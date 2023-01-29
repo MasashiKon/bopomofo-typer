@@ -13,18 +13,23 @@ class Word {
     }
 }
 
-const words = [new Word("這", ["ㄓ", "ㄜ", "ˋ"]), new Word("那", ["ㄋ", "ㄚ", "ˋ"]), new Word("我", ["ㄨ", "ㄛ", "ˇ"]), new Word("你", ["ㄋ", "ㄧ", "ˇ"]), new Word("妳", ["ㄋ", "ㄧ", "ˇ"]), new Word("他", ["ㄊ", "ㄚ"]), new Word("她", ["ㄊ", "ㄚ"]), new Word("男", ["ㄋ", "ㄢ", "ˊ"]), new Word("女", ["ㄋ", "ㄩ", "ˇ"])];
+const noun = [new Word("這", ["ㄓ", "ㄜ", "ˋ"]), new Word("那", ["ㄋ", "ㄚ", "ˋ"]), new Word("我", ["ㄨ", "ㄛ", "ˇ"]), new Word("你", ["ㄋ", "ㄧ", "ˇ"]), new Word("妳", ["ㄋ", "ㄧ", "ˇ"]), new Word("他", ["ㄊ", "ㄚ"]), new Word("她", ["ㄊ", "ㄚ"]), new Word("男", ["ㄋ", "ㄢ", "ˊ"]), new Word("女", ["ㄋ", "ㄩ", "ˇ"])];
+const object = [new Word("這", ["ㄓ", "ㄜ", "ˋ"]), new Word("那", ["ㄋ", "ㄚ", "ˋ"]), new Word("我", ["ㄨ", "ㄛ", "ˇ"]), new Word("你", ["ㄋ", "ㄧ", "ˇ"]), new Word("妳", ["ㄋ", "ㄧ", "ˇ"]), new Word("他", ["ㄊ", "ㄚ"]), new Word("她", ["ㄊ", "ㄚ"]), new Word("男", ["ㄋ", "ㄢ", "ˊ"]), new Word("女", ["ㄋ", "ㄩ", "ˇ"])];
 
 const gameState = {
   cooltime: 0,
   currentWord: null,
+  currentSentence: null,
   currentAnswer: null,
   currentBopomofoIndex: 0,
-  kanji: null,
+  currentKanjiIndex: 0,
+  sentences: [],
+  sentenceContainer: null,
+  kanji: [],
   bopomofo: [],
   timeLimit: 3000,
   onTyping: false,
-  words,
+  noun,
   timeLimitText: null,
   timeLimitBar: null,
   score: 0,
@@ -34,11 +39,13 @@ const gameState = {
 class GameScene extends Phaser.Scene {
   constructor(){
     super({ key: 'GameScene' });
-    this.key
+    this.key;
   }
 
   create() {
     gameState.scoreText = this.add.text(10, 10, `Score: ${gameState.score}`);
+    gameState.sentenceContainer = this.add.container(this.game.config.width/2, this.game.config.height/2);
+    gameState.sentences = [[noun[0], object[1]], [noun[5], object[5]]];
     this.keys = this.input.keyboard.addKeys('A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,zero,one,two,three,four,five,six,seven,eight,nine,MINUS,COMMA,PERIOD,FORWARD_SLASH');
   }
 
@@ -54,6 +61,10 @@ class GameScene extends Phaser.Scene {
         this.setNewWord();
         gameState.timeLimit = 3000;
       }
+    } 
+
+    if(gameState.currentSentence === null) {
+      this.setNewSentence();
     }
 
     if(gameState.currentWord === null) {
@@ -760,44 +771,60 @@ class GameScene extends Phaser.Scene {
   }
 
   setNewWord() {
-    if(gameState.currentWord) {
-      gameState.kanji.destroy();
-      gameState.bopomofo.forEach(bopomofo => bopomofo.destroy());
-    }
-    
-    gameState.currentWord = gameState.words.shift();
-    gameState.kanji = this.add.text(50, 50, `${gameState.currentWord.kanji}`, { fontSize: 25 });
-    for(const [i, bopo] of gameState.currentWord.bopomofo.entries()) {
-      gameState.bopomofo.push(this.add.text(50, 80 + i * 20, `${bopo}`));
-    }
+    gameState.currentWord = gameState.currentSentence.shift();
 
     gameState.currentAnswer =  gameState.currentWord.bopomofo.shift();
     gameState.onTyping = true;
   }
 
+  setNewSentence() {
+    while(gameState.sentenceContainer.list.length > 0) {
+      gameState.sentenceContainer.list[0].destroy();
+    }
+    gameState.kanji = [];
+    gameState.bopomofo = [];
+    gameState.currentSentence = gameState.sentences.shift();
+    for(const [i, word] of gameState.currentSentence.entries()) {
+      gameState.kanji.push(this.add.text(0 + i * 50, 0, word.kanji));
+      for(const [j, bopomofo] of word.bopomofo.entries()) {
+        gameState.bopomofo.push(this.add.text(0 + (j * 20) + (i * 50), 20, bopomofo));
+      }
+    }
+    gameState.sentenceContainer.add([...gameState.kanji]);
+    gameState.sentenceContainer.add([...gameState.bopomofo]);
+
+    gameState.currentBopomofoIndex = 0;
+    gameState.currentKanjiIndex = 0;
+  }
+
   changeColor() {
     gameState.bopomofo[gameState.currentBopomofoIndex].setColor("#ff00ff");
     gameState.currentBopomofoIndex++;
+    if(gameState.currentWord.bopomofo.length <= 0) {
+      gameState.kanji[gameState.currentKanjiIndex].setColor("#ff00ff");
+      gameState.currentKanjiIndex++;
+    }
   }
 
   evalNext() {
     if(gameState.currentWord.bopomofo.length > 0) {
       gameState.currentAnswer = gameState.currentWord.bopomofo.shift();
+    } else if (gameState.currentSentence.length > 0) {
+      this.setNewWord();
+      gameState.timeLimit += 200;
+    } else if(gameState.sentences.length > 0) {
+      this.setNewSentence();
+      this.setNewWord();
     } else {
-      if(gameState.words.length > 0) {
-        this.setNewWord();
-        gameState.timeLimit = 3000;
-      } else {
-        gameState.onTyping = false;
-        if(gameState.currentWord) {
-          gameState.kanji.destroy();
-          gameState.bopomofo.forEach(bopomofo => bopomofo.destroy());
-        }
-        gameState.timeLimitBar.destroy();
-        gameState.scoreText.destroy();
-        gameState.scoreText = this.add.text(this.game.config.width/2, this.game.config.height/2, gameState.score, {font: 20});
-        gameState.currentAnswer = null;
+      gameState.onTyping = false;
+      if(gameState.currentWord) {
+        gameState.sentenceContainer.destroy();
       }
+      gameState.timeLimitBar.destroy();
+      gameState.scoreText.destroy();
+      gameState.scoreText = this.add.text(this.game.config.width/2, this.game.config.height/2, gameState.score, {font: 20});
+      gameState.currentAnswer = null;
+
     }
   }
 
