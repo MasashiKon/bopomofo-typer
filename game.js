@@ -34,19 +34,63 @@ const gameState = {
   timeLimitBar: null,
   score: 0,
   scoreText: null,
+  keySize: 0.2,
+  keyPressedSize: 0.3
 }
 
 class GameScene extends Phaser.Scene {
   constructor(){
     super({ key: 'GameScene' });
-    this.key;
   }
 
   create() {
     gameState.scoreText = this.add.text(10, 10, `Score: ${gameState.score}`);
     gameState.sentenceContainer = this.add.container(this.game.config.width/2, this.game.config.height/2);
     gameState.sentences = [[noun[0], object[1]], [noun[5], object[5]]];
-    this.keys = this.input.keyboard.addKeys('A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,zero,one,two,three,four,five,six,seven,eight,nine,MINUS,COMMA,PERIOD,FORWARD_SLASH');
+    this.keys = this.input.keyboard.addKeys('A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,zero,one,two,three,four,five,six,seven,eight,nine,MINUS,COMMA,PERIOD,FORWARD_SLASH,SEMICOLON');
+
+    this.keyboard = this.add.image(this.game.config.width/2, 400, 'keyboard').setOrigin(1/2, 0);
+    this.keyimg_a = this.add.image(451, 422, 'a').setScale(gameState.keySize);
+    this.keyimg_ai = this.add.image(490, 422, 'ai').setScale(gameState.keySize);
+    this.keyimg_an = this.add.image(530, 425, 'an').setScale(gameState.keySize);
+    this.keyimg_ang = this.add.image(558, 500, 'ang').setScale(gameState.keySize);
+    this.keyimg_ao = this.add.image(517, 497, 'ao').setScale(gameState.keySize);
+    this.keyimg_b = this.add.image(171, 422, 'b').setScale(gameState.keySize);
+    this.keyimg_c = this.add.image(400, 500, 'c').setScale(gameState.keySize);
+    this.keyimg_ch = this.add.image(347, 462, 'ch').setScale(gameState.keySize);
+    this.keyimg_d = this.add.image(212, 422, 'd').setScale(gameState.keySize);
+    this.keyimg_e = this.add.image(480, 500, 'e').setScale(gameState.keySize);
+    this.keyimg_e2 = this.add.image(500, 540, 'e2').setScale(gameState.keySize);
+    this.keyimg_ei = this.add.image(507, 464, 'ei').setScale(gameState.keySize);
+    this.keyimg_en = this.add.image(546, 462, 'en').setScale(gameState.keySize);
+    this.keyimg_eng = this.add.image(580, 539, 'eng').setScale(gameState.keySize);
+    this.keyimg_er = this.add.image(570, 422, 'er').setScale(gameState.keySize);
+    this.keyimg_f = this.add.image(218, 539, 'f').setScale(gameState.keySize);
+    this.keyimg_g = this.add.image(268, 462, 'g').setScale(gameState.keySize);
+    this.keyimg_h = this.add.image(300, 539, 'h').setScale(gameState.keySize);
+    this.keyimg_i = this.add.image(427, 460, 'i').setScale(gameState.keySize);
+    this.keyimg_j = this.add.image(308, 463, 'j').setScale(gameState.keySize);
+    this.keyimg_k = this.add.image(277, 500, 'k').setScale(gameState.keySize);
+    this.keyimg_l = this.add.image(257, 539, 'l').setScale(gameState.keySize);
+    this.keyimg_m = this.add.image(198, 502, 'm').setScale(gameState.keySize);
+    this.keyimg_n = this.add.image(240, 500, 'n').setScale(gameState.keySize);
+    this.keyimg_o = this.add.image(468, 462, 'o').setScale(gameState.keySize);
+    this.keyimg_ou = this.add.image(539, 538, 'ou').setScale(gameState.keySize);
+    this.keyimg_p = this.add.image(187, 461, 'p').setScale(gameState.keySize);
+    this.keyimg_q = this.add.image(318, 501, 'q').setScale(gameState.keySize);
+    this.keyimg_r = this.add.image(379, 540, 'r').setScale(gameState.keySize);
+    this.keyimg_s = this.add.image(420, 538, 's').setScale(gameState.keySize);
+    this.keyimg_sh = this.add.image(359, 500, 'sh').setScale(gameState.keySize);
+    this.keyimg_t = this.add.image(228, 461, 't').setScale(gameState.keySize);
+    this.keyimg_u = this.add.image(438, 500, 'u').setScale(gameState.keySize);
+    this.keyimg_u2 = this.add.image(460, 540, 'u2').setScale(gameState.keySize);
+    this.keyimg_x = this.add.image(340, 540, 'x').setScale(gameState.keySize);
+    this.keyimg_z = this.add.image(387, 462, 'z').setScale(gameState.keySize);
+    this.keyimg_zh = this.add.image(331, 423, 'zh').setScale(gameState.keySize);
+    this.keyimg_2 = this.add.image(370, 423, '2').setScale(gameState.keySize);
+    this.keyimg_3 = this.add.image(252, 423, '3').setScale(gameState.keySize);
+    this.keyimg_4 = this.add.image(290, 423, '4').setScale(gameState.keySize);
+    this.keyimg_light = this.add.image(410, 422, 'light').setScale(gameState.keySize);
   }
 
   update() {
@@ -75,15 +119,13 @@ class GameScene extends Phaser.Scene {
       gameState.cooltime++
     }
 
-    if(gameState.cooltime >= 1) {
+    if(gameState.cooltime >= 10) {
       gameState.cooltime = 0;
       this.enableAllKeys();
     }
 
     if(gameState.cooltime === 0) {
       if(this.keys.A.isDown) {
-        this.keys.A.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄇ") {
           this.clucScore(true);
@@ -97,8 +139,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.B.isDown) {
-        this.keys.B.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄖ") {
           this.clucScore(true);
@@ -112,8 +152,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.C.isDown) {
-        this.keys.C.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄏ") {
           this.clucScore(true);
@@ -127,8 +165,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.D.isDown) {
-        this.keys.D.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄎ") {
           this.clucScore(true);
@@ -142,8 +178,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.E.isDown) {
-        this.keys.E.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄍ") {
           this.clucScore(true);
@@ -157,8 +191,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.F.isDown) {
-        this.keys.F.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄑ") {
           this.clucScore(true);
@@ -172,8 +204,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.G.isDown) {
-        this.keys.G.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄕ") {
           this.clucScore(true);
@@ -187,8 +217,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.H.isDown) {
-        this.keys.H.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄘ") {
           this.clucScore(true);
@@ -202,8 +230,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.I.isDown) {
-        this.keys.I.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄛ") {
           this.clucScore(true);
@@ -217,8 +243,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.J.isDown) {
-        this.keys.J.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄨ") {
           this.clucScore(true);
@@ -232,8 +256,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.K.isDown) {
-        this.keys.K.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄜ") {
           this.clucScore(true);
@@ -247,8 +269,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.L.isDown) {
-        this.keys.L.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄠ") {
           this.clucScore(true);
@@ -262,8 +282,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.M.isDown) {
-        this.keys.M.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄩ") {
           this.clucScore(true);
@@ -277,8 +295,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.N.isDown) {
-        this.keys.N.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄙ") {
           this.clucScore(true);
@@ -292,8 +308,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.O.isDown) {
-        this.keys.O.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄟ") {
           this.clucScore(true);
@@ -307,8 +321,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.P.isDown) {
-        this.keys.P.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄣ") {
           this.clucScore(true);
@@ -322,8 +334,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.Q.isDown) {
-        this.keys.Q.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄆ") {
           this.clucScore(true);
@@ -337,8 +347,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.R.isDown) {
-        this.keys.R.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄐ") {
           this.clucScore(true);
@@ -352,8 +360,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.S.isDown) {
-        this.keys.S.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄋ") {
           this.clucScore(true);
@@ -367,8 +373,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.T.isDown) {
-        this.keys.T.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄔ") {
           this.clucScore(true);
@@ -382,8 +386,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.U.isDown) {
-        this.keys.U.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄧ") {
           this.clucScore(true);
@@ -397,8 +399,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.V.isDown) {
-        this.keys.V.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄒ") {
           this.clucScore(true);
@@ -412,8 +412,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.W.isDown) {
-        this.keys.W.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄊ") {
           this.clucScore(true);
@@ -427,8 +425,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.X.isDown) {
-        this.keys.X.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄌ") {
           this.clucScore(true);
@@ -442,8 +438,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.Y.isDown) {
-        this.keys.Y.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "Ｙ") {
           this.clucScore(true);
@@ -457,8 +451,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.Z.isDown) {
-        this.keys.Z.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄈ") {
           this.clucScore(true);
@@ -472,8 +464,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.zero.isDown) {
-        this.keys.zero.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄢ") {
           this.clucScore(true);
@@ -487,8 +477,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.one.isDown) {
-        this.keys.one.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄅ") {
           this.clucScore(true);
@@ -502,8 +490,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.two.isDown) {
-        this.keys.two.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄉ") {
           this.clucScore(true);
@@ -517,8 +503,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.three.isDown) {
-        this.keys.three.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ˇ") {
           this.clucScore(true);
@@ -532,8 +516,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.four.isDown) {
-        this.keys.four.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ˋ") {
           this.clucScore(true);
@@ -547,8 +529,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.five.isDown) {
-        this.keys.five.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄓ") {
           this.clucScore(true);
@@ -562,8 +542,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.six.isDown) {
-        this.keys.six.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ˊ") {
           this.clucScore(true);
@@ -577,8 +555,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.seven.isDown) {
-        this.keys.seven.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "˙") {
           this.clucScore(true);
@@ -592,8 +568,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.eight.isDown) {
-        this.keys.eight.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄚ") {
           this.clucScore(true);
@@ -607,8 +581,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.nine.isDown) {
-        this.keys.nine.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄞ") {
           this.clucScore(true);
@@ -623,8 +595,6 @@ class GameScene extends Phaser.Scene {
 
 
       if(this.keys.MINUS.isDown) {
-        this.keys.MINUS.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄦ") {
           this.clucScore(true);
@@ -638,8 +608,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.COMMA.isDown) {
-        this.keys.COMMA.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄝ") {
           this.clucScore(true);
@@ -653,8 +621,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.PERIOD.isDown) {
-        this.keys.PERIOD.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄡ") {
           this.clucScore(true);
@@ -668,8 +634,6 @@ class GameScene extends Phaser.Scene {
       }
 
       if(this.keys.FORWARD_SLASH.isDown) {
-        this.keys.FORWARD_SLASH.isDown = false;
-        this.disableAllKeys();
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄥ") {
           this.clucScore(true);
@@ -681,6 +645,265 @@ class GameScene extends Phaser.Scene {
           this.clucScore(false);
         }
       }
+
+      if(this.keys.SEMICOLON.isDown) {
+        gameState.cooltime++;
+        if(gameState.currentAnswer === "ㄤ") {
+          this.clucScore(true);
+          this.changeColor();
+          this.evalNext();
+        } else if(gameState.currentAnswer === null) {
+          
+        } else {
+          this.clucScore(false);
+        }
+      }
+    }
+
+    if(this.keys.A.isDown) {
+      this.keyimg_m.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_m.setScale(gameState.keySize);
+    }
+
+    if(this.keys.B.isDown) {
+      this.keyimg_r.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_r.setScale(gameState.keySize);
+    }
+
+    if(this.keys.C.isDown) {
+      this.keyimg_h.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_h.setScale(gameState.keySize);
+    }
+
+    if(this.keys.D.isDown) {
+      this.keyimg_k.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_k.setScale(gameState.keySize);
+    }
+
+    if(this.keys.E.isDown) {
+      this.keyimg_g.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_g.setScale(gameState.keySize);
+    }
+
+    if(this.keys.F.isDown) {
+      this.keyimg_q.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_q.setScale(gameState.keySize);
+    }
+
+    if(this.keys.G.isDown) {
+      this.keyimg_sh.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_sh.setScale(gameState.keySize);
+    }
+
+    if(this.keys.H.isDown) {
+      this.keyimg_c.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_c.setScale(gameState.keySize);
+    }
+
+    if(this.keys.I.isDown) {
+      this.keyimg_o.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_o.setScale(gameState.keySize);
+    }
+
+    if(this.keys.J.isDown) {
+      this.keyimg_u.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_u.setScale(gameState.keySize);
+    }
+    
+    if(this.keys.K.isDown) {
+      this.keyimg_e.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_e.setScale(gameState.keySize);
+    }
+
+    if(this.keys.L.isDown) {
+      this.keyimg_ao.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_ao.setScale(gameState.keySize);
+    }
+
+    if(this.keys.M.isDown) {
+      this.keyimg_u2.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_u2.setScale(gameState.keySize);
+    }
+
+    if(this.keys.N.isDown) {
+      this.keyimg_s.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_s.setScale(gameState.keySize);
+    }
+
+    if(this.keys.O.isDown) {
+      this.keyimg_ei.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_ei.setScale(gameState.keySize);
+    }
+
+    if(this.keys.P.isDown) {
+      this.keyimg_en.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_en.setScale(gameState.keySize);
+    }
+
+    if(this.keys.Q.isDown) {
+      this.keyimg_p.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_p.setScale(gameState.keySize);
+    }
+
+    if(this.keys.R.isDown) {
+      this.keyimg_j.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_j.setScale(gameState.keySize);
+    }
+
+    if(this.keys.S.isDown) {
+      this.keyimg_n.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_n.setScale(gameState.keySize);
+    }
+    
+    if(this.keys.T.isDown) {
+      this.keyimg_ch.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_ch.setScale(gameState.keySize);
+    }
+
+    if(this.keys.U.isDown) {
+      this.keyimg_i.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_i.setScale(gameState.keySize);
+    }
+
+    if(this.keys.V.isDown) {
+      this.keyimg_x.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_x.setScale(gameState.keySize);
+    }
+
+    if(this.keys.W.isDown) {
+      this.keyimg_t.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_t.setScale(gameState.keySize);
+    }
+
+    if(this.keys.X.isDown) {
+      this.keyimg_l.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_l.setScale(gameState.keySize);
+    }
+
+    if(this.keys.Y.isDown) {
+      this.keyimg_z.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_z.setScale(gameState.keySize);
+    }
+
+    if(this.keys.Z.isDown) {
+      this.keyimg_f.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_f.setScale(gameState.keySize);
+    }
+
+    if(this.keys.one.isDown) {
+      this.keyimg_b.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_b.setScale(gameState.keySize);
+    }
+
+    if(this.keys.two.isDown) {
+      this.keyimg_d.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_d.setScale(gameState.keySize);
+    }
+
+    if(this.keys.three.isDown) {
+      this.keyimg_3.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_3.setScale(gameState.keySize);
+    }
+
+    if(this.keys.four.isDown) {
+      this.keyimg_4.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_4.setScale(gameState.keySize);
+    }
+
+    if(this.keys.five.isDown) {
+      this.keyimg_zh.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_zh.setScale(gameState.keySize);
+    }
+
+    if(this.keys.six.isDown) {
+      this.keyimg_2.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_2.setScale(gameState.keySize);
+    }
+
+    if(this.keys.seven.isDown) {
+      this.keyimg_light.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_light.setScale(gameState.keySize);
+    }
+
+    if(this.keys.eight.isDown) {
+      this.keyimg_a.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_a.setScale(gameState.keySize);
+    }
+
+    if(this.keys.nine.isDown) {
+      this.keyimg_ai.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_ai.setScale(gameState.keySize);
+    }
+
+    if(this.keys.zero.isDown) {
+      this.keyimg_an.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_an.setScale(gameState.keySize);
+    }
+
+    if(this.keys.MINUS.isDown) {
+      this.keyimg_er.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_er.setScale(gameState.keySize);
+    }
+
+    if(this.keys.COMMA.isDown) {
+      this.keyimg_e2.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_e2.setScale(gameState.keySize);
+    }
+
+    if(this.keys.PERIOD.isDown) {
+      this.keyimg_ou.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_ou.setScale(gameState.keySize);
+    }
+
+    if(this.keys.FORWARD_SLASH.isDown) {
+      this.keyimg_eng.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_eng.setScale(gameState.keySize);
+    }
+
+    if(this.keys.SEMICOLON.isDown) {
+      this.keyimg_ang.setScale(gameState.keyPressedSize);
+    } else {
+      this.keyimg_ang.setScale(gameState.keySize);
     }
   }
 
@@ -785,9 +1008,9 @@ class GameScene extends Phaser.Scene {
     gameState.bopomofo = [];
     gameState.currentSentence = gameState.sentences.shift();
     for(const [i, word] of gameState.currentSentence.entries()) {
-      gameState.kanji.push(this.add.text(0 + i * 50, 0, word.kanji));
+      gameState.kanji.push(this.add.text(0 + i * 60, 0, word.kanji).setOrigin(2, 0));
       for(const [j, bopomofo] of word.bopomofo.entries()) {
-        gameState.bopomofo.push(this.add.text(0 + (j * 20) + (i * 50), 20, bopomofo));
+        gameState.bopomofo.push(this.add.text(0 + (50 / word.bopomofo.length * j) + (i * 60), 20, bopomofo).setOrigin(2, 0));
       }
     }
     gameState.sentenceContainer.add([...gameState.kanji]);
@@ -846,10 +1069,55 @@ class MenuScene extends Phaser.Scene {
     this.menu;
     this.enter;
   }
+
+  preload() {
+    this.load.image('a', 'img/a.png');
+    this.load.image('ai', 'img/ai.png'); 
+    this.load.image('an', 'img/an.png');
+    this.load.image('ang', 'img/ang.png');
+    this.load.image('ao', 'img/ao.png');
+    this.load.image('b', 'img/b.png');
+    this.load.image('c', 'img/c.png');
+    this.load.image('ch', 'img/ch.png');
+    this.load.image('d', 'img/d.png');
+    this.load.image('e', 'img/e.png');
+    this.load.image('e2', 'img/e2.png');
+    this.load.image('ei', 'img/ei.png');
+    this.load.image('en', 'img/en.png');
+    this.load.image('eng', 'img/eng.png');
+    this.load.image('er', 'img/er.png');
+    this.load.image('f', 'img/f.png');
+    this.load.image('g', 'img/g.png');
+    this.load.image('h', 'img/h.png');
+    this.load.image('i', 'img/i.png');
+    this.load.image('j', 'img/j.png');
+    this.load.image('k', 'img/k.png');
+    this.load.image('l', 'img/l.png');
+    this.load.image('m', 'img/m.png');
+    this.load.image('n', 'img/n.png');
+    this.load.image('o', 'img/o.png');
+    this.load.image('ou', 'img/ou.png');
+    this.load.image('p', 'img/p.png');
+    this.load.image('q', 'img/q.png');
+    this.load.image('r', 'img/r.png');
+    this.load.image('s', 'img/s.png');
+    this.load.image('sh', 'img/sh.png');
+    this.load.image('t', 'img/t.png');
+    this.load.image('u', 'img/u.png');
+    this.load.image('u2', 'img/u2.png');
+    this.load.image('x', 'img/x.png');
+    this.load.image('z', 'img/z.png');
+    this.load.image('zh', 'img/zh.png');
+    this.load.image('2', 'img/2.png');
+    this.load.image('3', 'img/3.png');
+    this.load.image('4', 'img/4.png');
+    this.load.image('light', 'img/light.png');
+    this.load.image('keyboard', 'img/keyboard.png');
+  }
   create() {
-    this.title = this.add.text(this.game.config.width/2, this.game.config.height/2, "Bopomofo Typer", {font: 50});
+    this.title = this.add.text(this.game.config.width/2, this.game.config.height/2, "Bopomofo Typer", {font: 50}).setOrigin(0.5, 0.5);;
     this.menu = this.add.container(this.game.config.width/2, this.game.config.height/2 + 100);
-    const navText = this.add.text(0, 0, "Press Enter to start.");
+    const navText = this.add.text(0, 0, "Press Enter to start.").setOrigin(0.5, 0.5);
     this.menu.add([navText]);
     this.input.keyboard.on("keydown-ENTER", () => {
       this.scene.stop('MenuScene');
