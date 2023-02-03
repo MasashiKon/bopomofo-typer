@@ -14,7 +14,7 @@ class Word {
 }
 
 const noun = [new Word("這", ["ㄓ", "ㄜ", "ˋ"]), new Word("那", ["ㄋ", "ㄚ", "ˋ"]), new Word("我", ["ㄨ", "ㄛ", "ˇ"]), new Word("你", ["ㄋ", "ㄧ", "ˇ"]), new Word("妳", ["ㄋ", "ㄧ", "ˇ"]), new Word("他", ["ㄊ", "ㄚ"]), new Word("她", ["ㄊ", "ㄚ"]), new Word("男", ["ㄋ", "ㄢ", "ˊ"]), new Word("女", ["ㄋ", "ㄩ", "ˇ"])];
-const object = [new Word("這", ["ㄓ", "ㄜ", "ˋ"]), new Word("那", ["ㄋ", "ㄚ", "ˋ"]), new Word("我", ["ㄨ", "ㄛ", "ˇ"]), new Word("你", ["ㄋ", "ㄧ", "ˇ"]), new Word("妳", ["ㄋ", "ㄧ", "ˇ"]), new Word("他", ["ㄊ", "ㄚ"]), new Word("她", ["ㄊ", "ㄚ"]), new Word("男", ["ㄋ", "ㄢ", "ˊ"]), new Word("女", ["ㄋ", "ㄩ", "ˇ"])];
+const object = [new Word("我", ["ㄨ", "ㄛ", "ˇ"]), new Word("你", ["ㄋ", "ㄧ", "ˇ"]), new Word("這", ["ㄓ", "ㄜ", "ˋ"]), new Word("那", ["ㄋ", "ㄚ", "ˋ"]), new Word("妳", ["ㄋ", "ㄧ", "ˇ"]), new Word("他", ["ㄊ", "ㄚ"]), new Word("她", ["ㄊ", "ㄚ"]), new Word("男", ["ㄋ", "ㄢ", "ˊ"]), new Word("女", ["ㄋ", "ㄩ", "ˇ"])];
 
 const gameState = {
   cooltime: 0,
@@ -27,7 +27,8 @@ const gameState = {
   sentenceContainer: null,
   kanji: [],
   bopomofo: [],
-  timeLimit: 3000,
+  timeLimit: 0,
+  timeLimitMax: 3000,
   onTyping: false,
   noun,
   timeLimitText: null,
@@ -46,7 +47,7 @@ class GameScene extends Phaser.Scene {
   create() {
     gameState.scoreText = this.add.text(10, 10, `Score: ${gameState.score}`);
     gameState.sentenceContainer = this.add.container(this.game.config.width/2, this.game.config.height/2);
-    gameState.sentences = [[noun[0], object[1]], [noun[5], object[5]]];
+    gameState.sentences = [[new Word(noun[0].kanji, [...noun[0].bopomofo]), new Word(object[1].kanji, [...object[1].bopomofo])], [new Word(noun[8].kanji, [...noun[8].bopomofo]), new Word(object[5].kanji, [...object[5].bopomofo])]];
     this.keys = this.input.keyboard.addKeys('A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,zero,one,two,three,four,five,six,seven,eight,nine,MINUS,COMMA,PERIOD,FORWARD_SLASH,SEMICOLON');
 
     this.keyboard = this.add.image(this.game.config.width/2, 400, 'keyboard').setOrigin(1/2, 0);
@@ -94,6 +95,11 @@ class GameScene extends Phaser.Scene {
   }
 
   update() {
+    if(!gameState.onTyping) {
+      gameState.sentences = [[new Word(noun[0].kanji, [...noun[0].bopomofo]), new Word(object[1].kanji, [...object[1].bopomofo])], [new Word(noun[8].kanji, [...noun[8].bopomofo]), new Word(object[5].kanji, [...object[5].bopomofo])]];
+      gameState.currentSentence = null
+    }
+
     if(gameState.onTyping) {
       gameState.timeLimit -= 1;
 
@@ -101,17 +107,16 @@ class GameScene extends Phaser.Scene {
       gameState.timeLimitBar = this.add.rectangle(this.game.config.width/10 * 6, this.game.config.height/10, gameState.timeLimit/10, 10, 0x00ff00).setOrigin(0, 0.5);
 
       if(gameState.timeLimit <= 0) {
-        gameState.onTyping = false;
-        this.setNewWord();
-        gameState.timeLimit = 3000;
+        gameState.timeLimit = gameState.timeLimitMax;
+        gameState.currentSentence = null;
+        gameState.currentWord = null;
+        gameState.currentAnswer = null;
+        this.evalNext();
       }
     } 
 
-    if(gameState.currentSentence === null) {
+    if(gameState.currentSentence === null && gameState.onTyping === false) {
       this.setNewSentence();
-    }
-
-    if(gameState.currentWord === null) {
       this.setNewWord();
     }
 
@@ -997,7 +1002,6 @@ class GameScene extends Phaser.Scene {
     gameState.currentWord = gameState.currentSentence.shift();
 
     gameState.currentAnswer =  gameState.currentWord.bopomofo.shift();
-    gameState.onTyping = true;
   }
 
   setNewSentence() {
@@ -1018,6 +1022,9 @@ class GameScene extends Phaser.Scene {
 
     gameState.currentBopomofoIndex = 0;
     gameState.currentKanjiIndex = 0;
+
+    gameState.onTyping = true;
+    gameState.timeLimit = gameState.timeLimitMax;
   }
 
   changeColor() {
@@ -1030,24 +1037,17 @@ class GameScene extends Phaser.Scene {
   }
 
   evalNext() {
-    if(gameState.currentWord.bopomofo.length > 0) {
+    if(gameState.currentWord !== null && gameState.currentWord.bopomofo.length > 0) {
       gameState.currentAnswer = gameState.currentWord.bopomofo.shift();
-    } else if (gameState.currentSentence.length > 0) {
-      this.setNewWord();
+    } else if (gameState.currentSentence !== null && gameState.currentSentence.length > 0) {
       gameState.timeLimit += 200;
+      this.setNewWord();
     } else if(gameState.sentences.length > 0) {
       this.setNewSentence();
       this.setNewWord();
     } else {
-      gameState.onTyping = false;
-      if(gameState.currentWord) {
-        gameState.sentenceContainer.destroy();
-      }
-      gameState.timeLimitBar.destroy();
-      gameState.scoreText.destroy();
-      gameState.scoreText = this.add.text(this.game.config.width/2, this.game.config.height/2, gameState.score, {font: 20});
-      gameState.currentAnswer = null;
-
+      this.scene.stop('GameScene');
+      this.scene.start('ScoreScene');
     }
   }
 
@@ -1126,7 +1126,20 @@ class MenuScene extends Phaser.Scene {
   }
 }
 
+class ScoreScene extends Phaser.Scene {
+  constructor() {
+    super({key: "ScoreScene"});
+  }
 
+  create() {
+    gameState.onTyping = false;
+    gameState.scoreText = this.add.text(this.game.config.width/2, this.game.config.height/2, gameState.score, {font: 20});
+    this.input.keyboard.on("keydown-ENTER", () => {
+      this.scene.stop('ScoreScene');
+			this.scene.start('GameScene');
+    })
+  }
+}
 
 const config = {
   type: Phaser.CANVAS,
@@ -1136,7 +1149,7 @@ const config = {
     width: 800,
     height: 600,
   },
-  scene: [MenuScene, GameScene]
+  scene: [MenuScene, GameScene, ScoreScene]
 }
 
 const game = new Phaser.Game(config);
