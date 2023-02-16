@@ -13,8 +13,9 @@ class Word {
     }
 }
 
-const noun = [new Word("這", ["ㄓ", "ㄜ", "ˋ"]), new Word("那", ["ㄋ", "ㄚ", "ˋ"]), new Word("我", ["ㄨ", "ㄛ", "ˇ"]), new Word("你", ["ㄋ", "ㄧ", "ˇ"]), new Word("妳", ["ㄋ", "ㄧ", "ˇ"]), new Word("他", ["ㄊ", "ㄚ"]), new Word("她", ["ㄊ", "ㄚ"]), new Word("男", ["ㄋ", "ㄢ", "ˊ"]), new Word("女", ["ㄋ", "ㄩ", "ˇ"])];
-const object = [new Word("我", ["ㄨ", "ㄛ", "ˇ"]), new Word("你", ["ㄋ", "ㄧ", "ˇ"]), new Word("這", ["ㄓ", "ㄜ", "ˋ"]), new Word("那", ["ㄋ", "ㄚ", "ˋ"]), new Word("妳", ["ㄋ", "ㄧ", "ˇ"]), new Word("他", ["ㄊ", "ㄚ"]), new Word("她", ["ㄊ", "ㄚ"]), new Word("男", ["ㄋ", "ㄢ", "ˊ"]), new Word("女", ["ㄋ", "ㄩ", "ˇ"])];
+const noun = [new Word("這", ["ㄓ", "ㄜ", "ˋ"]), new Word("那", ["ㄋ", "ㄚ", "ˋ"]), new Word("我", ["ㄨ", "ㄛ", "ˇ"]), new Word("你", ["ㄋ", "一", "ˇ"]), new Word("妳", ["ㄋ", "一", "ˇ"]), new Word("他", ["ㄊ", "ㄚ"]), new Word("她", ["ㄊ", "ㄚ"]), new Word("男", ["ㄋ", "ㄢ", "ˊ"]), new Word("女", ["ㄋ", "ㄩ", "ˇ"])];
+const object = [new Word("我", ["ㄨ", "ㄛ", "ˇ"]), new Word("你", ["ㄋ", "一", "ˇ"]), new Word("這", ["ㄓ", "ㄜ", "ˋ"]), new Word("那", ["ㄋ", "ㄚ", "ˋ"]), new Word("妳", ["ㄋ", "一", "ˇ"]), new Word("他", ["ㄊ", "ㄚ"]), new Word("她", ["ㄊ", "ㄚ"]), new Word("男", ["ㄋ", "ㄢ", "ˊ"]), new Word("女", ["ㄋ", "ㄩ", "ˇ"])];
+const verb = [new Word("懂", ["ㄉ", "ㄨ", "ㄥ", "ˇ"]), new Word("笑", ["ㄒ", "一", "ㄠ", "ˋ"])];
 
 const gameState = {
   cooltime: 0,
@@ -47,7 +48,7 @@ class GameScene extends Phaser.Scene {
   create() {
     gameState.scoreText = this.add.text(10, 10, `Score: ${gameState.score}`);
     gameState.sentenceContainer = this.add.container(this.game.config.width/2, this.game.config.height/2);
-    gameState.sentences = [[new Word(noun[0].kanji, [...noun[0].bopomofo]), new Word(object[1].kanji, [...object[1].bopomofo])], [new Word(noun[8].kanji, [...noun[8].bopomofo]), new Word(object[5].kanji, [...object[5].bopomofo])]];
+    gameState.sentences = this.makeSentences();
     this.keys = this.input.keyboard.addKeys('A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,zero,one,two,three,four,five,six,seven,eight,nine,MINUS,COMMA,PERIOD,FORWARD_SLASH,SEMICOLON');
 
     this.keyboard = this.add.image(this.game.config.width/2, 400, 'keyboard').setOrigin(1/2, 0);
@@ -96,7 +97,7 @@ class GameScene extends Phaser.Scene {
 
   update() {
     if(!gameState.onTyping) {
-      gameState.sentences = [[new Word(noun[0].kanji, [...noun[0].bopomofo]), new Word(object[1].kanji, [...object[1].bopomofo])], [new Word(noun[8].kanji, [...noun[8].bopomofo]), new Word(object[5].kanji, [...object[5].bopomofo])]];
+      gameState.sentences = this.makeSentences();
       gameState.currentSentence = null
     }
 
@@ -392,7 +393,7 @@ class GameScene extends Phaser.Scene {
 
       if(this.keys.U.isDown) {
         gameState.cooltime++;
-        if(gameState.currentAnswer === "ㄧ") {
+        if(gameState.currentAnswer === "一") {
           this.clucScore(true);
           this.changeColor();
           this.evalNext();
@@ -1059,6 +1060,27 @@ class GameScene extends Phaser.Scene {
     }
     if(gameState.scoreText) gameState.scoreText.destroy();
     gameState.scoreText = this.add.text(10, 10, `Score: ${gameState.score}`);
+  }
+
+  makeSentences() {
+    const words = [];
+    for(let i = 0; i < 10; i++) {
+      const syntaxType = Math.floor(Math.random() * 2);
+      if(syntaxType === 0) {
+        const nounIndex = Math.floor(Math.random() * noun.length);
+        const verbIndex = Math.floor(Math.random() * verb.length);
+        const objectIndex = Math.floor(Math.random() * object.length);
+        const word = [new Word(noun[nounIndex].kanji, [...noun[nounIndex].bopomofo]), new Word(verb[verbIndex].kanji, [...verb[verbIndex].bopomofo]), new Word(object[objectIndex].kanji, [...object[objectIndex].bopomofo])];
+        words.push(word);
+      } else {
+        const nounIndex = Math.floor(Math.random() * noun.length);
+        const verbIndex = Math.floor(Math.random() * verb.length);
+        const objectIndex = Math.floor(Math.random() * object.length);
+        const word = [new Word(noun[nounIndex].kanji, [...noun[nounIndex].bopomofo]), new Word(verb[verbIndex].kanji, [...verb[verbIndex].bopomofo]), new Word(object[objectIndex].kanji, [...object[objectIndex].bopomofo])];
+        words.push(word);
+      }
+    }
+    return words;
   }
 }
 
