@@ -13,9 +13,9 @@ class Word {
     }
 }
 
-const noun = [new Word("這", ["ㄓ", "ㄜ", "ˋ"]), new Word("那", ["ㄋ", "ㄚ", "ˋ"]), new Word("我", ["ㄨ", "ㄛ", "ˇ"]), new Word("你", ["ㄋ", "一", "ˇ"]), new Word("妳", ["ㄋ", "一", "ˇ"]), new Word("他", ["ㄊ", "ㄚ"]), new Word("她", ["ㄊ", "ㄚ"]), new Word("男", ["ㄋ", "ㄢ", "ˊ"]), new Word("女", ["ㄋ", "ㄩ", "ˇ"])];
-const object = [new Word("我", ["ㄨ", "ㄛ", "ˇ"]), new Word("你", ["ㄋ", "一", "ˇ"]), new Word("這", ["ㄓ", "ㄜ", "ˋ"]), new Word("那", ["ㄋ", "ㄚ", "ˋ"]), new Word("妳", ["ㄋ", "一", "ˇ"]), new Word("他", ["ㄊ", "ㄚ"]), new Word("她", ["ㄊ", "ㄚ"]), new Word("男", ["ㄋ", "ㄢ", "ˊ"]), new Word("女", ["ㄋ", "ㄩ", "ˇ"])];
-const verb = [new Word("懂", ["ㄉ", "ㄨ", "ㄥ", "ˇ"]), new Word("笑", ["ㄒ", "一", "ㄠ", "ˋ"])];
+const noun = [[{kanji: "這", bopomofo: ["ㄓ", "ㄜ", "ˋ"]}], [{kanji: "那", bopomofo: ["ㄋ", "ㄚ", "ˋ"]}], [{kanji: "我", bopomofo: ["ㄨ", "ㄛ", "ˇ"]}], [{kanji: "你", bopomofo: ["ㄋ", "一", "ˇ"]}], [{kanji: "妳", bopomofo: ["ㄋ", "一", "ˇ"]}], [{kanji: "他", bopomofo: ["ㄊ", "ㄚ"]}], [{kanji: "她", bopomofo: ["ㄊ", "ㄚ"]}], [{kanji: "男", bopomofo: ["ㄋ", "ㄢ", "ˊ"]}], [{kanji: "女", bopomofo: ["ㄋ", "ㄩ", "ˇ"]}]];
+const object = [[{kanji: "這", bopomofo: ["ㄓ", "ㄜ", "ˋ"]}], [{kanji: "那", bopomofo: ["ㄋ", "ㄚ", "ˋ"]}], [{kanji: "我", bopomofo: ["ㄨ", "ㄛ", "ˇ"]}], [{kanji: "你", bopomofo: ["ㄋ", "一", "ˇ"]}], [{kanji: "妳", bopomofo: ["ㄋ", "一", "ˇ"]}], [{kanji: "他", bopomofo: ["ㄊ", "ㄚ"]}], [{kanji: "她", bopomofo: ["ㄊ", "ㄚ"]}], [{kanji: "男", bopomofo: ["ㄋ", "ㄢ", "ˊ"]}], [{kanji: "女", bopomofo: ["ㄋ", "ㄩ", "ˇ"]}]];
+const verb = [[{kanji: "懂", bopomofo: ["ㄉ", "ㄨ", "ㄥ", "ˇ"]}], [{kanji: "笑", bopomofo: ["ㄒ", "一", "ㄠ", "ˋ"]}], [{kanji: "知", bopomofo: ["ㄓ"]}, {kanji: "道", bopomofo: ["ㄉ", "ㄠ", "ˋ"]}], [{kanji: "認", bopomofo: ["ㄖ", "ㄣ", "ˋ"]}, {kanji: "識", bopomofo: ["ㄕ", "ˋ"]}]];
 
 const gameState = {
   cooltime: 0,
@@ -106,6 +106,14 @@ class GameScene extends Phaser.Scene {
 
       if(gameState.timeLimitBar !== null) gameState.timeLimitBar.destroy();
       gameState.timeLimitBar = this.add.rectangle(this.game.config.width/10 * 6, this.game.config.height/10, gameState.timeLimit/10, 10, 0x00ff00).setOrigin(0, 0.5);
+      
+      if(gameState.timeLimit >= 1000) {
+        gameState.timeLimitBar.setFillStyle(0x00ff00);
+      } else if(gameState.timeLimit >= 500) {
+        gameState.timeLimitBar.setFillStyle(0xffff00);
+      } else {
+        gameState.timeLimitBar.setFillStyle(0xff0000);
+      }
 
       if(gameState.timeLimit <= 0) {
         gameState.timeLimit = gameState.timeLimitMax;
@@ -1012,14 +1020,24 @@ class GameScene extends Phaser.Scene {
     gameState.kanji = [];
     gameState.bopomofo = [];
     gameState.currentSentence = gameState.sentences.shift();
+    let width = 0;
+    let height = 0;
     for(const [i, word] of gameState.currentSentence.entries()) {
-      gameState.kanji.push(this.add.text(0 + i * 60, 0, word.kanji).setOrigin(2, 0));
+      gameState.kanji.push(this.add.text(0 + i * 60, 0, word.kanji).setOrigin(0.5));
       for(const [j, bopomofo] of word.bopomofo.entries()) {
-        gameState.bopomofo.push(this.add.text(0 + (50 / word.bopomofo.length * j) + (i * 60), 20, bopomofo).setOrigin(2, 0));
+        gameState.bopomofo.push(this.add.text(0 + (50 / word.bopomofo.length * j) + (i * 60), 20, bopomofo).setOrigin(0.5));
+        if(j === word.bopomofo.length - 1) {
+          width = (50 / word.bopomofo.length * j) + (i * 60);
+          height = 20;
+        }
       }
     }
+
     gameState.sentenceContainer.add([...gameState.kanji]);
     gameState.sentenceContainer.add([...gameState.bopomofo]);
+
+    gameState.sentenceContainer.setSize(width, height);
+    gameState.sentenceContainer.setX(this.game.config.width/2 - width/2, this.game.config.height/2 - height/2);
 
     gameState.currentBopomofoIndex = 0;
     gameState.currentKanjiIndex = 0;
@@ -1070,13 +1088,37 @@ class GameScene extends Phaser.Scene {
         const nounIndex = Math.floor(Math.random() * noun.length);
         const verbIndex = Math.floor(Math.random() * verb.length);
         const objectIndex = Math.floor(Math.random() * object.length);
-        const word = [new Word(noun[nounIndex].kanji, [...noun[nounIndex].bopomofo]), new Word(verb[verbIndex].kanji, [...verb[verbIndex].bopomofo]), new Word(object[objectIndex].kanji, [...object[objectIndex].bopomofo])];
+        const pickedNoun = noun[nounIndex];
+        const pickedVerb = verb[verbIndex];
+        const pickedObject = object[objectIndex];
+        const word = [];
+        for(let char of pickedNoun) {
+          word.push(new Word(char.kanji, [...char.bopomofo]));
+        }
+        for(let char of pickedVerb) {
+          word.push(new Word(char.kanji, [...char.bopomofo]));
+        }
+        for(let char of pickedObject) {
+          word.push(new Word(char.kanji, [...char.bopomofo]));
+        }
         words.push(word);
       } else {
         const nounIndex = Math.floor(Math.random() * noun.length);
         const verbIndex = Math.floor(Math.random() * verb.length);
         const objectIndex = Math.floor(Math.random() * object.length);
-        const word = [new Word(noun[nounIndex].kanji, [...noun[nounIndex].bopomofo]), new Word(verb[verbIndex].kanji, [...verb[verbIndex].bopomofo]), new Word(object[objectIndex].kanji, [...object[objectIndex].bopomofo])];
+        const pickedNoun = noun[nounIndex];
+        const pickedVerb = verb[verbIndex];
+        const pickedObject = object[objectIndex];
+        const word = [];
+        for(let char of pickedNoun) {
+          word.push(new Word(char.kanji, [...char.bopomofo]));
+        }
+        for(let char of pickedVerb) {
+          word.push(new Word(char.kanji, [...char.bopomofo]));
+        }
+        for(let char of pickedObject) {
+          word.push(new Word(char.kanji, [...char.bopomofo]));
+        }
         words.push(word);
       }
     }
