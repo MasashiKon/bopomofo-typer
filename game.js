@@ -1,8 +1,45 @@
 import Phaser from 'phaser'
-
-// let keys;
-
-let location = [0, 0];
+// reference
+// "ㄇ", "m"
+// "ㄖ", "r"
+// "ㄏ", "h"
+// "ㄎ", "k"
+// "ㄍ", "g"
+// "ㄑ", "q"
+// "ㄕ", "sh"
+// "ㄘ", "c"
+// "ㄛ", "o"
+// "ㄨ", "u"
+// "ㄜ", "e"
+// "ㄠ", "ao"
+// "ㄩ", "u2"
+// "ㄙ", "s"
+// "ㄟ", "ei"
+// "ㄣ", "en"
+// "ㄆ", "p"
+// "ㄐ", "j"
+// "ㄋ", "n"
+// "ㄔ", "ch"
+// "一", "i"
+// "ㄒ", "x"
+// "ㄊ", "t"
+// "ㄌ", "l"
+// "ㄗ", "z"
+// "ㄈ", "f"
+// "ㄢ", "an"
+// "ㄅ", "b"
+// "ㄉ", "d"
+// "ˇ", "3"
+// "ˋ", "4"
+// "ㄓ", "zh"
+// "ˊ", "2"
+// "˙", "light"
+// "ㄚ", "a"
+// "ㄞ", "ai"
+// "ㄦ", "er"
+// "ㄝ", "e2"
+// "ㄡ", "ou"
+// "ㄥ", "eng"
 
 let test;
 
@@ -15,7 +52,7 @@ class Word {
 
 const noun = [[{kanji: "這", bopomofo: ["ㄓ", "ㄜ", "ˋ"]}], [{kanji: "那", bopomofo: ["ㄋ", "ㄚ", "ˋ"]}], [{kanji: "我", bopomofo: ["ㄨ", "ㄛ", "ˇ"]}], [{kanji: "你", bopomofo: ["ㄋ", "一", "ˇ"]}], [{kanji: "妳", bopomofo: ["ㄋ", "一", "ˇ"]}], [{kanji: "他", bopomofo: ["ㄊ", "ㄚ"]}], [{kanji: "她", bopomofo: ["ㄊ", "ㄚ"]}], [{kanji: "男", bopomofo: ["ㄋ", "ㄢ", "ˊ"]}], [{kanji: "女", bopomofo: ["ㄋ", "ㄩ", "ˇ"]}]];
 const object = [[{kanji: "這", bopomofo: ["ㄓ", "ㄜ", "ˋ"]}], [{kanji: "那", bopomofo: ["ㄋ", "ㄚ", "ˋ"]}], [{kanji: "我", bopomofo: ["ㄨ", "ㄛ", "ˇ"]}], [{kanji: "你", bopomofo: ["ㄋ", "一", "ˇ"]}], [{kanji: "妳", bopomofo: ["ㄋ", "一", "ˇ"]}], [{kanji: "他", bopomofo: ["ㄊ", "ㄚ"]}], [{kanji: "她", bopomofo: ["ㄊ", "ㄚ"]}], [{kanji: "男", bopomofo: ["ㄋ", "ㄢ", "ˊ"]}], [{kanji: "女", bopomofo: ["ㄋ", "ㄩ", "ˇ"]}]];
-const verb = [[{kanji: "懂", bopomofo: ["ㄉ", "ㄨ", "ㄥ", "ˇ"]}], [{kanji: "笑", bopomofo: ["ㄒ", "一", "ㄠ", "ˋ"]}], [{kanji: "知", bopomofo: ["ㄓ"]}, {kanji: "道", bopomofo: ["ㄉ", "ㄠ", "ˋ"]}], [{kanji: "認", bopomofo: ["ㄖ", "ㄣ", "ˋ"]}, {kanji: "識", bopomofo: ["ㄕ", "ˋ"]}]];
+const verb = [[{kanji: "愛", bopomofo: ["ㄞ", "ˋ"]}], [{kanji: "懂", bopomofo: ["ㄉ", "ㄨ", "ㄥ", "ˇ"]}], [{kanji: "笑", bopomofo: ["ㄒ", "一", "ㄠ", "ˋ"]}], [{kanji: "知", bopomofo: ["ㄓ"]}, {kanji: "道", bopomofo: ["ㄉ", "ㄠ", "ˋ"]}], [{kanji: "認", bopomofo: ["ㄖ", "ㄣ", "ˋ"]}, {kanji: "識", bopomofo: ["ㄕ", "ˋ"]}], [{kanji: "覺", bopomofo: ["ㄐ", "ㄩ", "ㄝ", "ˊ"]}, {kanji: "得", bopomofo: ["ㄉ", "ㄜ", "˙"]}]];
 
 const gameState = {
   cooltime: 0,
@@ -30,6 +67,9 @@ const gameState = {
   bopomofo: [],
   timeLimit: 0,
   timeLimitMax: 3000,
+  waitTime: 1000,
+  helperDuration: 100,
+  mistakeCountForHelp: 0,
   onTyping: false,
   noun,
   timeLimitText: null,
@@ -103,13 +143,14 @@ class GameScene extends Phaser.Scene {
 
     if(gameState.onTyping) {
       gameState.timeLimit -= 1;
+      gameState.waitTime -= 1;
 
       if(gameState.timeLimitBar !== null) gameState.timeLimitBar.destroy();
       gameState.timeLimitBar = this.add.rectangle(this.game.config.width/10 * 6, this.game.config.height/10, gameState.timeLimit/10, 10, 0x00ff00).setOrigin(0, 0.5);
       
-      if(gameState.timeLimit >= 1000) {
+      if(gameState.timeLimit >= 800) {
         gameState.timeLimitBar.setFillStyle(0x00ff00);
-      } else if(gameState.timeLimit >= 500) {
+      } else if(gameState.timeLimit >= 300) {
         gameState.timeLimitBar.setFillStyle(0xffff00);
       } else {
         gameState.timeLimitBar.setFillStyle(0xff0000);
@@ -122,6 +163,134 @@ class GameScene extends Phaser.Scene {
         gameState.currentAnswer = null;
         this.evalNext();
       }
+
+      if(gameState.waitTime <= 0) {
+        gameState.helperDuration = (gameState.helperDuration + 1) % 100; 
+
+        switch(gameState.currentAnswer) {
+          case "ㄇ":
+            this.helper("m", gameState.helperDuration);
+            break;  
+          case "ㄖ":
+            this.helper("r", gameState.helperDuration);
+            break;  
+          case "ㄏ":
+            this.helper("h", gameState.helperDuration);
+            break;  
+          case "ㄎ":
+            this.helper("k", gameState.helperDuration);
+            break;
+          case "ㄍ":
+            this.helper("g", gameState.helperDuration);
+            break;
+          case "ㄑ":
+            this.helper("q", gameState.helperDuration);
+            break;
+          case "ㄕ":
+            this.helper("sh", gameState.helperDuration);
+            break;
+          case "ㄘ":
+            this.helper("c", gameState.helperDuration);
+            break;
+          case "ㄛ":
+            this.helper("o", gameState.helperDuration);
+            break;  
+          case "ㄨ":
+            this.helper("u", gameState.helperDuration);
+            break;
+          case "ㄜ":
+            this.helper("e", gameState.helperDuration);
+            break;
+          case "ㄠ":
+            this.helper("ao", gameState.helperDuration);
+            break;  
+          case "ㄩ":
+            this.helper("u2", gameState.helperDuration);
+            break;
+          case "ㄙ":
+            this.helper("s", gameState.helperDuration);
+            break;  
+          case "ㄟ":
+            this.helper("ei", gameState.helperDuration);
+            break;  
+          case "ㄣ":
+            this.helper("en", gameState.helperDuration);
+            break;  
+          case "ㄆ":
+            this.helper("p", gameState.helperDuration);
+            break;  
+          case "ㄐ":
+            this.helper("j", gameState.helperDuration);
+            break;
+          case "ㄋ":
+            this.helper("n", gameState.helperDuration);
+            break;
+          case "ㄔ":
+            this.helper("ch", gameState.helperDuration);
+            break;
+          case "一":
+            this.helper("i", gameState.helperDuration);
+            break;
+          case "ㄒ":
+            this.helper("x", gameState.helperDuration);
+            break;
+          case "ㄊ":
+            this.helper("t", gameState.helperDuration);
+            break;
+          case "ㄌ":
+            this.helper("l", gameState.helperDuration);
+            break;
+          case "ㄗ":
+            this.helper("z", gameState.helperDuration);
+            break;
+          case "ㄈ":
+            this.helper("f", gameState.helperDuration);
+            break;
+          case "ㄢ":
+            this.helper("an", gameState.helperDuration);
+            break;
+          case "ㄅ":
+            this.helper("b", gameState.helperDuration);
+            break;
+          case "ㄉ":
+            this.helper("d", gameState.helperDuration);
+            break;
+          case "ˇ":
+            this.helper("3", gameState.helperDuration);
+            break;
+          case "ˋ":
+            this.helper("4", gameState.helperDuration);
+            break;
+          case "ㄓ":
+            this.helper("zh", gameState.helperDuration);
+            break;
+          case "ˊ":
+            this.helper("2", gameState.helperDuration);
+            break;
+          case "˙":
+            this.helper("light", gameState.helperDuration);
+            break;
+          case "ㄚ":
+            this.helper("a", gameState.helperDuration);
+            break;
+          case "ㄞ":
+            this.helper("ai", gameState.helperDuration);
+            break;
+          case "ㄦ":
+            this.helper("er", gameState.helperDuration);
+            break;
+          case "ㄝ":
+            this.helper("e2", gameState.helperDuration);
+            break;
+          case "ㄡ":
+            this.helper("ou", gameState.helperDuration);
+            break;
+          case "ㄥ":
+            this.helper("eng", gameState.helperDuration);
+            break;
+        }
+      }
+
     } 
 
     if(gameState.currentSentence === null && gameState.onTyping === false) {
@@ -142,468 +311,396 @@ class GameScene extends Phaser.Scene {
       if(this.keys.A.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄇ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
 
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.B.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄖ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.C.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄏ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.D.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄎ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.E.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄍ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.F.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄑ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.G.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄕ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.H.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄘ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.I.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄛ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.J.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄨ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.K.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄜ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.L.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄠ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.M.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄩ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.N.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄙ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.O.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄟ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.P.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄣ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.Q.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄆ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.R.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄐ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.S.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄋ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.T.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄔ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.U.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "一") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.V.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄒ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.W.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄊ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.X.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄌ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.Y.isDown) {
         gameState.cooltime++;
-        if(gameState.currentAnswer === "Ｙ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+        if(gameState.currentAnswer === "ㄗ") {
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.Z.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄈ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.zero.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄢ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.one.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄅ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.two.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄉ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.three.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ˇ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.four.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ˋ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.five.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄓ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.six.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ˊ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.seven.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "˙") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.eight.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄚ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.nine.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄞ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
@@ -611,65 +708,55 @@ class GameScene extends Phaser.Scene {
       if(this.keys.MINUS.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄦ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.COMMA.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄝ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.PERIOD.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄡ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.FORWARD_SLASH.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄥ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
 
       if(this.keys.SEMICOLON.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄤ") {
-          this.clucScore(true);
-          this.changeColor();
-          this.evalNext();
+          this.correctProcess();
         } else if(gameState.currentAnswer === null) {
           
         } else {
-          this.clucScore(false);
+          this.mistakeProcess();
         }
       }
     }
@@ -1009,7 +1096,6 @@ class GameScene extends Phaser.Scene {
 
   setNewWord() {
     gameState.currentWord = gameState.currentSentence.shift();
-
     gameState.currentAnswer =  gameState.currentWord.bopomofo.shift();
   }
 
@@ -1023,12 +1109,12 @@ class GameScene extends Phaser.Scene {
     let width = 0;
     let height = 0;
     for(const [i, word] of gameState.currentSentence.entries()) {
-      gameState.kanji.push(this.add.text(0 + i * 60, 0, word.kanji).setOrigin(0.5));
+      gameState.kanji.push(this.add.text(0 + i * 120, 0, word.kanji, {fontSize: 80}).setOrigin(0, 0.5));
       for(const [j, bopomofo] of word.bopomofo.entries()) {
-        gameState.bopomofo.push(this.add.text(0 + (50 / word.bopomofo.length * j) + (i * 60), 20, bopomofo).setOrigin(0.5));
+        gameState.bopomofo.push(this.add.text(0 + (120 / word.bopomofo.length * j) + (i * 120), 60, bopomofo, {fontSize: 30}).setOrigin(0, 0.5));
         if(j === word.bopomofo.length - 1) {
-          width = (50 / word.bopomofo.length * j) + (i * 60);
-          height = 20;
+          width = (120 / word.bopomofo.length * j) + (i * 120);
+          height = 60;
         }
       }
     }
@@ -1037,7 +1123,8 @@ class GameScene extends Phaser.Scene {
     gameState.sentenceContainer.add([...gameState.bopomofo]);
 
     gameState.sentenceContainer.setSize(width, height);
-    gameState.sentenceContainer.setX(this.game.config.width/2 - width/2, this.game.config.height/2 - height/2);
+    gameState.sentenceContainer.setX(this.game.config.width/2 - width/2);
+    gameState.sentenceContainer.setY(this.game.config.height/2 - height/2 * 2.5);
 
     gameState.currentBopomofoIndex = 0;
     gameState.currentKanjiIndex = 0;
@@ -1074,7 +1161,8 @@ class GameScene extends Phaser.Scene {
     if(correct) {
       gameState.score += 10;
     } else {
-      gameState.score -= 10;
+      gameState.score -= 1;
+      if(gameState.score < 0) gameState.score = 0;
     }
     if(gameState.scoreText) gameState.scoreText.destroy();
     gameState.scoreText = this.add.text(10, 10, `Score: ${gameState.score}`);
@@ -1123,6 +1211,69 @@ class GameScene extends Phaser.Scene {
       }
     }
     return words;
+  }
+
+  correctProcess() {
+    gameState.waitTime = 1000;
+    gameState.helperDuration = 100;
+    gameState.mistakeCountForHelp = 0;
+    this.clucScore(true);
+    this.changeColor();
+    this.evalNext();
+
+    this.keyimg_a.setAlpha(1);
+    this.keyimg_ai.setAlpha(1);
+    this.keyimg_an.setAlpha(1);
+    this.keyimg_ang.setAlpha(1);
+    this.keyimg_ao.setAlpha(1);
+    this.keyimg_b.setAlpha(1);
+    this.keyimg_c.setAlpha(1);
+    this.keyimg_ch.setAlpha(1);
+    this.keyimg_d.setAlpha(1);
+    this.keyimg_e.setAlpha(1);
+    this.keyimg_e2.setAlpha(1);
+    this.keyimg_ei.setAlpha(1);
+    this.keyimg_en.setAlpha(1);
+    this.keyimg_eng.setAlpha(1);
+    this.keyimg_er.setAlpha(1);
+    this.keyimg_f.setAlpha(1);
+    this.keyimg_g.setAlpha(1);
+    this.keyimg_h.setAlpha(1);
+    this.keyimg_i.setAlpha(1);
+    this.keyimg_j.setAlpha(1);
+    this.keyimg_k.setAlpha(1);
+    this.keyimg_l.setAlpha(1);
+    this.keyimg_m.setAlpha(1);
+    this.keyimg_n.setAlpha(1);
+    this.keyimg_o.setAlpha(1);
+    this.keyimg_ou.setAlpha(1);
+    this.keyimg_p.setAlpha(1);
+    this.keyimg_q.setAlpha(1);
+    this.keyimg_r.setAlpha(1);
+    this.keyimg_s.setAlpha(1);
+    this.keyimg_sh.setAlpha(1);
+    this.keyimg_t.setAlpha(1);
+    this.keyimg_u.setAlpha(1);
+    this.keyimg_u2.setAlpha(1);
+    this.keyimg_x.setAlpha(1);
+    this.keyimg_z.setAlpha(1);
+    this.keyimg_zh.setAlpha(1);
+    this.keyimg_2.setAlpha(1);
+    this.keyimg_3.setAlpha(1);
+    this.keyimg_4.setAlpha(1);
+    this.keyimg_light.setAlpha(1);
+  }
+
+  mistakeProcess() {
+    gameState.mistakeCountForHelp += 1;
+    this.clucScore(false);
+    if(gameState.mistakeCountForHelp >= 10) {
+      gameState.waitTime = 0;
+    }
+  }
+
+  helper(key, alpha) {
+    this[`keyimg_${key}`].setAlpha(alpha / 100);
   }
 }
 
