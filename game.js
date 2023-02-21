@@ -41,8 +41,6 @@ import Phaser from 'phaser'
 // "ㄡ", "ou"
 // "ㄥ", "eng"
 
-let test;
-
 class Word {
   constructor(kanji, bopomofo) {
       this.kanji = kanji;
@@ -77,7 +75,8 @@ const gameState = {
   score: 0,
   scoreText: null,
   keySize: 0.2,
-  keyPressedSize: 0.3
+  keyPressedSize: 0.3,
+  difficulty: "normal"
 }
 
 class GameScene extends Phaser.Scene {
@@ -1170,7 +1169,18 @@ class GameScene extends Phaser.Scene {
 
   makeSentences() {
     const words = [];
-    for(let i = 0; i < 10; i++) {
+    let numOfSentences;
+    switch(gameState.mode) {
+      case "normal":
+        numOfSentences = 10;
+        break;
+      case "debug":
+        numOfSentences = 2;
+        break;
+      default:
+        numOfSentences = 10;
+    }
+    for(let i = 0; i < numOfSentences; i++) {
       const syntaxType = Math.floor(Math.random() * 2);
       if(syntaxType === 0) {
         const nounIndex = Math.floor(Math.random() * noun.length);
@@ -1330,14 +1340,31 @@ class MenuScene extends Phaser.Scene {
     this.load.image('keyboard', 'img/keyboard.png');
   }
   create() {
-    this.title = this.add.text(this.game.config.width/2, this.game.config.height/2, "Bopomofo Typer", {font: 50}).setOrigin(0.5, 0.5);;
+    this.modes = ["normal", "debug"];
+    this.index = 0;
+    this.title = this.add.text(this.game.config.width/2, this.game.config.height/2, "Bopomofo Typer", {fontSize: 50}).setOrigin(0.5, 0.5);;
     this.menu = this.add.container(this.game.config.width/2, this.game.config.height/2 + 100);
-    const navText = this.add.text(0, 0, "Press Enter to start.").setOrigin(0.5, 0.5);
-    this.menu.add([navText]);
+    const navText1 = this.add.text(0, 0, "Normal", {fontSize: 30}).setOrigin(0.5, 0.5);
+    const navText2 = this.add.text(0, 40, "Debug", {fontSize: 30}).setOrigin(0.5, 0.5);
+    const cursorRect = this.add.rectangle(0, 0, 120, 30, 0xffffff, 0.3).setOrigin(0.5, 0.5);
+    this.menu.add([navText1, navText2, cursorRect]);
+
     this.input.keyboard.on("keydown-ENTER", () => {
       this.scene.stop('MenuScene');
 			this.scene.start('GameScene');
-    })
+    });
+
+    this.input.keyboard.on("keydown-UP", () => {
+      this.index = this.index > 0 ? this.index - 1 : this.modes.length - 1;
+      gameState.mode = this.modes[this.index];
+      cursorRect.setY(this.index * 40);
+    });
+
+    this.input.keyboard.on("keydown-DOWN", () => {
+      this.index = (this.index + 1) % this.modes.length;
+      gameState.mode = this.modes[this.index];
+      cursorRect.setY(this.index * 40);
+    });
   }
 }
 
@@ -1348,11 +1375,44 @@ class ScoreScene extends Phaser.Scene {
 
   create() {
     gameState.onTyping = false;
-    gameState.scoreText = this.add.text(this.game.config.width/2, this.game.config.height/2, gameState.score, {font: 20});
+    gameState.scoreText = this.add.text(this.game.config.width/2, this.game.config.height/2, gameState.score, {fontSize: 30}).setOrigin(0.5, 0.5);
+
+    this.options = ["replay", "title"];
+    this.index = 0;
+    this.option = this.options[this.index];
+    this.menu = this.add.container(this.game.config.width/2, this.game.config.height/2 + 100);
+    const navText1 = this.add.text(0, 0, "Another Game", {fontSize: 30}).setOrigin(0.5, 0.5);
+    const navText2 = this.add.text(0, 40, "Back to Title", {fontSize: 30}).setOrigin(0.5, 0.5);
+    const cursorRect = this.add.rectangle(0, 0, 250, 30, 0xffffff, 0.3).setOrigin(0.5, 0.5);
+
+    this.menu.add([navText1, navText2, cursorRect]);
+
     this.input.keyboard.on("keydown-ENTER", () => {
       this.scene.stop('ScoreScene');
-			this.scene.start('GameScene');
+      switch(this.option) {
+        case "replay":
+          this.scene.start('GameScene');
+          break;
+        case "title":
+          this.scene.start('MenuScene');
+          break;
+        default:
+          this.scene.start('MenuScene');
+      }
+			
     })
+
+    this.input.keyboard.on("keydown-UP", () => {
+      this.index = this.index > 0 ? this.index - 1 : this.options.length - 1;
+      this.option = this.options[this.index];
+      cursorRect.setY(this.index * 40);
+    });
+
+    this.input.keyboard.on("keydown-DOWN", () => {
+      this.index = (this.index + 1) % this.options.length;
+      this.option = this.options[this.index];
+      cursorRect.setY(this.index * 40);
+    });
   }
 }
 
