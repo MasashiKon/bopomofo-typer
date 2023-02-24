@@ -1573,36 +1573,35 @@ class ScoreScene extends Phaser.Scene {
     gameState.scoreText = this.add.text(this.game.config.width/2, this.game.config.height/2, gameState.score, {fontSize: 30}).setOrigin(0.5, 0.5);
     this.set = false;
 
+    for(let key in gameState.wrongTypes) {
+      if(gameState.wrongTypes[key] >= gameState.worstThree[2].numOfMisstypes) {
+        if(gameState.wrongTypes[key] >= gameState.worstThree[1].numOfMisstypes) {
+          if(gameState.wrongTypes[key] >= gameState.worstThree[0].numOfMisstypes) {
+            gameState.worstThree[2] = gameState.worstThree[1];
+            gameState.worstThree[1] = gameState.worstThree[0];
+            gameState.worstThree[0] = {key, numOfMisstypes: gameState.wrongTypes[key]};
+          } else {
+            gameState.worstThree[2] = gameState.worstThree[1];
+            gameState.worstThree[1] = {key, numOfMisstypes: gameState.wrongTypes[key]};
+          }
+        } else {
+          gameState.worstThree[2] = {key, numOfMisstypes: gameState.wrongTypes[key]};
+        }
+      }
+    }
 
-    // statsOfKeys.forEach(key => {
+    if(gameState.worstThreeContainer === null) {
+      gameState.worstThreeContainer = this.add.container(100, 100);
+    } else {
+      gameState.worstThreeContainer.destroy();
+      gameState.worstThreeContainer = this.add.container(100, 100);
+    }
 
-    //   if(key.numOfMisstypes >= worstThree[2].numOfMisstypes) {
-    //     if(key.numOfMisstypes >= worstThree[1].numOfMisstypes) {
-    //       if(key.numOfMisstypes >= worstThree[0].numOfMisstypes) {
-    //         worstThree[2] = worstThree[1];
-    //         worstThree[1] = worstThree[0];
-    //         worstThree[0] = key;
-    //       } else {
-    //         worstThree[2] = worstThree[1];
-    //         worstThree[1] = key;
-    //       }
-    //     } else {
-    //       worstThree[2] = key;
-    //     }
-    //   }
+    gameState.worstThreeContainer.add(this.add.text(0, 0, "Your frequently mistyped keys:"));
 
-    // });
-
-    // if(gameState.worstThreeContainer === null) {
-    //   gameState.worstThreeContainer = this.add.container(100, 100);
-    // } else {
-    //   gameState.worstThreeContainer.destroy();
-    //   gameState.worstThreeContainer = this.add.container(100, 100);
-    // }
-
-    // for(let i = 0; i < 3; i++) {
-    //   gameState.worstThreeContainer.add(this.add.text(0 + 100 * i, 0, `${worstThree[i].key}: ${worstThree[i].accuracy}`));
-    // }
+    for(let i = 0; i < 3; i++) {
+      gameState.worstThreeContainer.add(this.add.text(0 + 100 * i, 30, `${i + 1}. ${this.alphabetToBopomofo(gameState.worstThree[i].key)}: ${gameState.worstThree[i].numOfMisstypes}`));
+    }
 
     this.options = ["replay", "title"];
     this.index = 0;
@@ -1618,15 +1617,20 @@ class ScoreScene extends Phaser.Scene {
       this.scene.stop('ScoreScene');
       switch(this.option) {
         case "replay":
+          this.resetWorstKeys();
+          gameState.score = 0;
           this.scene.start('GameScene');
           break;
         case "title":
+          this.resetWorstKeys();
+          gameState.score = 0;
           this.scene.start('MenuScene');
           break;
         default:
+          this.resetWorstKeys();
+          gameState.score = 0;
           this.scene.start('MenuScene');
       }
-			
     })
 
     this.input.keyboard.on("keydown-UP", () => {
@@ -1641,104 +1645,200 @@ class ScoreScene extends Phaser.Scene {
       cursorRect.setY(this.index * 40);
     });
 
-    this.events.on('addedtoscene', () => {
-      console.log("addedtoscene");
-    });
+    // this.events.on('addedtoscene', () => {
+    //   console.log("addedtoscene");
+    // });
 
-    this.events.on('boot', () => {
-      console.log("boot");
-    });
+    // this.events.on('boot', () => {
+    //   console.log("boot");
+    // });
 
-    this.events.on('create', () => {
-      console.log("create");
-    });
+    // this.events.on('create', () => {
+    //   console.log("create");
+    // });
 
-    this.events.on('destroy', () => {
-      console.log("destroy");
-    });   
+    // this.events.on('destroy', () => {
+    //   console.log("destroy");
+    // });   
     
-    this.events.on('pause', () => {
-      console.log("pause");
-    });
+    // this.events.on('pause', () => {
+    //   console.log("pause");
+    // });
 
-    this.events.on('postupdate', () => {
-      console.log("postupdate");
-    });   
+    // this.events.on('postupdate', () => {
+    //   console.log("postupdate");
+    // });   
     
-    this.events.on('prerender', () => {
-      console.log("prerender");
-    });
+    // this.events.on('prerender', () => {
+    //   console.log("prerender");
+    // });
 
-    this.events.on('preupdate', () => {
-      console.log("preupdate");
-    });   
+    // this.events.on('preupdate', () => {
+    //   console.log("preupdate");
+    // });   
     
-    this.events.on('ready', () => {
-      console.log("ready");
-    });
+    // this.events.on('ready', () => {
+    //   console.log("ready");
+    // });
 
-    this.events.on('removedfromscene', () => {
-      console.log("removedfromscene");
-    });   
+    // this.events.on('removedfromscene', () => {
+    //   console.log("removedfromscene");
+    // });   
     
-    this.events.on('render', () => {
-      console.log("render");
-    });
+    // this.events.on('render', () => {
+    //   console.log("render");
+    // });
 
-    this.events.on('resume', () => {
-      console.log("resume");
-    });
+    // this.events.on('resume', () => {
+    //   console.log("resume");
+    // });
 
-    this.events.on('shutdown', () => {
-      console.log("shutdown");
-    });
+    // this.events.on('shutdown', () => {
+    //   console.log("shutdown");
+    // });
 
-    this.events.on('resume', () => {
-      console.log("resumed");
-    });
+    // this.events.on('resume', () => {
+    //   console.log("resumed");
+    // });
 
-    this.events.on('sleep', () => {
-      console.log("sleep");
-    });
+    // this.events.on('sleep', () => {
+    //   console.log("sleep");
+    // });
 
-    this.events.on('start', () => {
-      console.log("start");
-    });
+    // this.events.on('start', () => {
+    //   console.log("start");
+    // });
 
-    this.events.on('transitioncomplete', () => {
-      console.log("transitioncomplete");
-    });
+    // this.events.on('transitioncomplete', () => {
+    //   console.log("transitioncomplete");
+    // });
 
-    this.events.on('transitioninit', () => {
-      console.log("transitioninit");
-    });
+    // this.events.on('transitioninit', () => {
+    //   console.log("transitioninit");
+    // });
 
-    this.events.on('transitionout', () => {
-      console.log("transitionout");
-    });
+    // this.events.on('transitionout', () => {
+    //   console.log("transitionout");
+    // });
 
-    this.events.on('transitionstart', () => {
-      console.log("transitionstart");
-    });
+    // this.events.on('transitionstart', () => {
+    //   console.log("transitionstart");
+    // });
 
-    this.events.on('transitionout', () => {
-      console.log("transitionout");
-    });
+    // this.events.on('transitionout', () => {
+    //   console.log("transitionout");
+    // });
 
-    this.events.on('transitionwake', () => {
-      console.log("transitionwake");
-    });
+    // this.events.on('transitionwake', () => {
+    //   console.log("transitionwake");
+    // });
 
-    this.events.on('update', () => {
-      console.log("update");
-    });
+    // this.events.on('update', () => {
+    //   console.log("update");
+    // });
 
-    this.events.on('wake', () => {
-      console.log("wake");
-    });
+    // this.events.on('wake', () => {
+    //   console.log("wake");
+    // });
 
-    console.log(this.events.on);
+  }
 
+  resetWorstKeys() {
+    for(let i = 0; i < 3; i++) {
+      gameState.worstThree.pop();
+    }
+    for(let i = 0; i < 3; i++) {
+      gameState.worstThree .push({key: null, numOfMisstypes: 0});
+    }
+  }
+
+  alphabetToBopomofo(alphabet) {
+    switch(alphabet) {
+      case "m":
+        return "ㄇ";
+      case "r":
+        return "ㄖ";
+      case "h":
+        return "ㄏ";
+      case "k":
+        return "ㄎ";
+      case "g":
+        return "ㄍ";
+      case "q":
+        return "ㄑ";
+      case "sh":
+        return "ㄕ";
+      case "c":
+        return "ㄘ";
+      case "o":
+        return "ㄛ";
+      case "u":
+        return "ㄨ";
+      case "e":
+      return "ㄜ"; 
+      case "ao":
+        return "ㄠ"; 
+      case "u2":
+        return "ㄩ"; 
+      case "s":
+        return "ㄙ"; 
+      case "ei":
+        return "ㄟ"; 
+      case "en":
+        return "ㄣ";
+      case "p":
+      return "ㄆ"; 
+      case "j":
+        return "ㄐ"; 
+      case "n":
+        return "ㄋ"; 
+      case "ch":
+        return "ㄔ"; 
+      case "i":
+      return "一";
+      case "x":
+        return "ㄒ";
+      case "t":
+        return "ㄊ"; 
+      case "l":
+        return "ㄌ";
+      case "z":
+      return "ㄗ"; 
+      case "f":
+        return "ㄈ";
+      case "an":
+        return "ㄢ";
+      case "b":
+        return "ㄅ"; 
+      case "d":
+        return "ㄉ";
+      case "3":
+        return "ˇ";
+      case "4":
+        return "ˋ";
+      case "zh":
+        return "ㄓ";
+      case "2":
+        return "ˊ"; 
+      case "light":
+        return "˙";
+      case "a":
+        return "ㄚ"; 
+      case "ai":
+        return "ㄞ";
+      case "er":
+        return "ㄦ";
+      case "e2":
+        return "ㄝ";
+      case "ou":
+        return "ㄡ";
+      case "eng":
+        return "ㄥ";
+      case "ang":
+        return "ㄤ"; 
+      case dafault: 
+        return undefined;
+    }
   }
 }
 
@@ -1749,6 +1849,7 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: 800,
     height: 600,
+    parent: "game"
   },
   scene: [MenuScene, GameScene, ScoreScene]
 }
