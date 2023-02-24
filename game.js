@@ -1,4 +1,48 @@
-import Phaser from 'phaser'
+import Phaser from 'phaser';
+
+import A from './img/a.png';
+import Ai from "./img/ai.png";
+import An from "./img/an.png"
+import Ang from "./img/ang.png";
+import Ao from "./img/ao.png";
+import B from "./img/b.png";
+import C from "./img/c.png";
+import Ch from "./img/ch.png";
+import D from "./img/d.png";
+import E from "./img/e.png";
+import E2 from "./img/e2.png";
+import Ei from "./img/ei.png";
+import En from "./img/en.png";
+import Eng from "./img/eng.png";
+import Er from "./img/er.png";
+import F from "./img/f.png";
+import G from "./img/g.png";
+import H from "./img/h.png";
+import I from "./img/i.png";
+import J from "./img/j.png";
+import K from "./img/k.png";
+import L from "./img/l.png";
+import M from "./img/m.png";
+import N from "./img/n.png";
+import O from "./img/o.png";
+import Ou from "./img/ou.png";
+import P from "./img/p.png";
+import Q from "./img/q.png";
+import R from "./img/r.png";
+import S from "./img/s.png";
+import Sh from "./img/sh.png";
+import T from "./img/t.png";
+import U from "./img/u.png";
+import U2 from "./img/u2.png";
+import X from "./img/x.png";
+import Z from "./img/z.png";
+import Zh from "./img/zh.png";
+import Two from "./img/2.png";
+import Three from "./img/3.png";
+import Four from "./img/4.png";
+import Light from "./img/light.png";
+import Keyboard from "./img/keyboard.png";
+
 // reference
 // "ㄇ", "m"
 // "ㄖ", "r"
@@ -40,6 +84,7 @@ import Phaser from 'phaser'
 // "ㄝ", "e2"
 // "ㄡ", "ou"
 // "ㄥ", "eng"
+// "ㄤ", "ang"
 
 class Word {
   constructor(kanji, bopomofo) {
@@ -76,7 +121,53 @@ const gameState = {
   scoreText: null,
   keySize: 0.2,
   keyPressedSize: 0.3,
-  difficulty: "normal"
+  difficulty: "normal",
+  timeReady: 60 * 3,
+  wrongTypes: {
+    m: 0,
+    r: 0,
+    h: 0,
+    k: 0,
+    g: 0,
+    q: 0,
+    sh: 0,
+    c: 0,
+    o: 0,
+    u: 0,
+    e: 0,
+    ao: 0,
+    u2: 0,
+    s: 0,
+    ei: 0,
+    en: 0,
+    p: 0,
+    j: 0,
+    n: 0,
+    ch: 0,
+    i: 0,
+    x: 0,
+    t: 0,
+    l: 0,
+    z: 0,
+    f: 0,
+    an: 0,
+    b: 0,
+    d: 0,
+    3: 0,
+    4: 0,
+    zh: 0,
+    2: 0,
+    light: 0,
+    a: 0,
+    ai: 0,
+    er: 0,
+    e2: 0,
+    ou: 0,
+    eng: 0,
+    ang: 0
+  },
+  worstThreeContainer: null,
+  worstThree: [{key: null, numOfMisstypes: 0}, {key: null, numOfMisstypes: 0}, {key: null, numOfMisstypes: 0}]
 }
 
 class GameScene extends Phaser.Scene {
@@ -89,6 +180,7 @@ class GameScene extends Phaser.Scene {
     gameState.sentenceContainer = this.add.container(this.game.config.width/2, this.game.config.height/2);
     gameState.sentences = this.makeSentences();
     this.keys = this.input.keyboard.addKeys('A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,zero,one,two,three,four,five,six,seven,eight,nine,MINUS,COMMA,PERIOD,FORWARD_SLASH,SEMICOLON');
+    this.countDownText;
 
     this.keyboard = this.add.image(this.game.config.width/2, 400, 'keyboard').setOrigin(1/2, 0);
     this.keyimg_a = this.add.image(451, 422, 'a').setScale(gameState.keySize);
@@ -136,8 +228,18 @@ class GameScene extends Phaser.Scene {
 
   update() {
     if(!gameState.onTyping) {
-      gameState.sentences = this.makeSentences();
-      gameState.currentSentence = null
+      if(gameState.timeReady === 180) {
+        gameState.sentences = this.makeSentences();
+        gameState.currentSentence = null;
+
+        this.countDownText = this.add.text(this.game.config.width/2, this.game.config.height/2 - this.game.config.height/2 / 3, "3", {fontSize: 50});
+      } else if(gameState.timeReady <= 120 && gameState.timeReady > 60) {
+        this.countDownText.setText("2");
+      } else if(gameState.timeReady <= 60) {
+        this.countDownText.setText("1");
+      }
+
+      gameState.timeReady--;
     }
 
     if(gameState.onTyping) {
@@ -292,7 +394,8 @@ class GameScene extends Phaser.Scene {
 
     } 
 
-    if(gameState.currentSentence === null && gameState.onTyping === false) {
+    if(gameState.currentSentence === null && !gameState.onTyping && gameState.timeReady <= 0) {
+      this.countDownText.destroy();
       this.setNewSentence();
       this.setNewWord();
     }
@@ -310,7 +413,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.A.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄇ") {
-          this.correctProcess();
+          this.correctProcess("m");
         } else if(gameState.currentAnswer === null) {
 
         } else {
@@ -321,7 +424,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.B.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄖ") {
-          this.correctProcess();
+          this.correctProcess("r");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -332,7 +435,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.C.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄏ") {
-          this.correctProcess();
+          this.correctProcess("h");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -343,7 +446,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.D.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄎ") {
-          this.correctProcess();
+          this.correctProcess("k");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -354,7 +457,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.E.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄍ") {
-          this.correctProcess();
+          this.correctProcess("g");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -365,7 +468,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.F.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄑ") {
-          this.correctProcess();
+          this.correctProcess("q");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -376,7 +479,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.G.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄕ") {
-          this.correctProcess();
+          this.correctProcess("sh");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -387,7 +490,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.H.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄘ") {
-          this.correctProcess();
+          this.correctProcess("c");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -398,7 +501,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.I.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄛ") {
-          this.correctProcess();
+          this.correctProcess("o");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -409,7 +512,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.J.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄨ") {
-          this.correctProcess();
+          this.correctProcess("u");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -420,7 +523,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.K.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄜ") {
-          this.correctProcess();
+          this.correctProcess("e");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -431,7 +534,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.L.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄠ") {
-          this.correctProcess();
+          this.correctProcess("ao");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -442,7 +545,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.M.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄩ") {
-          this.correctProcess();
+          this.correctProcess("u2");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -453,7 +556,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.N.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄙ") {
-          this.correctProcess();
+          this.correctProcess("s");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -464,7 +567,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.O.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄟ") {
-          this.correctProcess();
+          this.correctProcess("ei");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -475,7 +578,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.P.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄣ") {
-          this.correctProcess();
+          this.correctProcess("en");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -486,7 +589,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.Q.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄆ") {
-          this.correctProcess();
+          this.correctProcess("p");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -497,7 +600,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.R.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄐ") {
-          this.correctProcess();
+          this.correctProcess("j");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -508,7 +611,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.S.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄋ") {
-          this.correctProcess();
+          this.correctProcess("n");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -519,7 +622,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.T.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄔ") {
-          this.correctProcess();
+          this.correctProcess("ch");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -530,7 +633,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.U.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "一") {
-          this.correctProcess();
+          this.correctProcess("i");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -541,7 +644,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.V.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄒ") {
-          this.correctProcess();
+          this.correctProcess("x");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -552,7 +655,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.W.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄊ") {
-          this.correctProcess();
+          this.correctProcess("t");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -563,7 +666,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.X.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄌ") {
-          this.correctProcess();
+          this.correctProcess("l");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -574,7 +677,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.Y.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄗ") {
-          this.correctProcess();
+          this.correctProcess("z");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -585,7 +688,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.Z.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄈ") {
-          this.correctProcess();
+          this.correctProcess("f");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -596,7 +699,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.zero.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄢ") {
-          this.correctProcess();
+          this.correctProcess("an");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -607,7 +710,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.one.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄅ") {
-          this.correctProcess();
+          this.correctProcess("b");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -618,7 +721,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.two.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄉ") {
-          this.correctProcess();
+          this.correctProcess("d");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -629,7 +732,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.three.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ˇ") {
-          this.correctProcess();
+          this.correctProcess("3");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -640,7 +743,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.four.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ˋ") {
-          this.correctProcess();
+          this.correctProcess("4");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -651,7 +754,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.five.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄓ") {
-          this.correctProcess();
+          this.correctProcess("zh");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -662,7 +765,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.six.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ˊ") {
-          this.correctProcess();
+          this.correctProcess("2");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -673,7 +776,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.seven.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "˙") {
-          this.correctProcess();
+          this.correctProcess("light");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -684,7 +787,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.eight.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄚ") {
-          this.correctProcess();
+          this.correctProcess("a");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -695,7 +798,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.nine.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄞ") {
-          this.correctProcess();
+          this.correctProcess("ai");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -707,7 +810,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.MINUS.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄦ") {
-          this.correctProcess();
+          this.correctProcess("er");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -718,7 +821,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.COMMA.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄝ") {
-          this.correctProcess();
+          this.correctProcess("e2");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -729,7 +832,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.PERIOD.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄡ") {
-          this.correctProcess();
+          this.correctProcess("ou");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -740,7 +843,7 @@ class GameScene extends Phaser.Scene {
       if(this.keys.FORWARD_SLASH.isDown) {
         gameState.cooltime++;
         if(gameState.currentAnswer === "ㄥ") {
-          this.correctProcess();
+          this.correctProcess("eng");
         } else if(gameState.currentAnswer === null) {
           
         } else {
@@ -1223,7 +1326,7 @@ class GameScene extends Phaser.Scene {
     return words;
   }
 
-  correctProcess() {
+  correctProcess(typedKey) {
     gameState.waitTime = 1000;
     gameState.helperDuration = 100;
     gameState.mistakeCountForHelp = 0;
@@ -1276,6 +1379,7 @@ class GameScene extends Phaser.Scene {
 
   mistakeProcess() {
     gameState.mistakeCountForHelp += 1;
+    gameState.wrongTypes[this.bopomofoToAlphabet(gameState.currentAnswer)] ++;
     this.clucScore(false);
     if(gameState.mistakeCountForHelp >= 10) {
       gameState.waitTime = 0;
@@ -1284,6 +1388,95 @@ class GameScene extends Phaser.Scene {
 
   helper(key, alpha) {
     this[`keyimg_${key}`].setAlpha(alpha / 100);
+  }
+
+  bopomofoToAlphabet(bopomofo) {
+    switch(bopomofo) {
+      case "ㄇ": 
+        return "m";
+      case "ㄖ": 
+        return "r";
+      case "ㄏ": 
+        return "h";
+      case "ㄎ": 
+        return "k";
+      case "ㄍ": 
+        return "g";
+      case "ㄑ": 
+        return "q";
+      case "ㄕ": 
+        return "sh";
+      case "ㄘ": 
+        return "c";
+      case "ㄛ": 
+        return "o";
+      case "ㄨ": 
+        return "u";
+      case "ㄜ": 
+        return "e";
+      case "ㄠ": 
+        return "ao";
+      case "ㄩ": 
+        return "u2";
+      case "ㄙ": 
+        return "s";
+      case "ㄟ": 
+        return "ei";
+      case "ㄣ": 
+        return "en";
+      case "ㄆ": 
+        return "p";
+      case "ㄐ": 
+        return "j";
+      case "ㄋ": 
+        return "n";
+      case "ㄔ": 
+        return "ch";
+      case "一": 
+        return "i";
+      case "ㄒ": 
+        return "x";
+      case "ㄊ": 
+        return "t";
+      case "ㄌ": 
+        return "l";
+      case "ㄗ": 
+        return "z";
+      case "ㄈ": 
+        return "f";
+      case "ㄢ": 
+        return "an";
+      case "ㄅ": 
+        return "b";
+      case "ㄉ": 
+        return "d";
+      case "ˇ": 
+        return "3";
+      case "ˋ": 
+        return "4";
+      case "ㄓ": 
+        return "zh";
+      case "ˊ": 
+        return "2";
+      case "˙": 
+        return "light";
+      case "ㄚ": 
+        return "a";
+      case "ㄞ": 
+        return "ai";
+      case "ㄦ": 
+        return "er";
+      case "ㄝ": 
+        return "e2";
+      case "ㄡ": 
+        return "ou";
+      case "ㄥ": 
+        return "eng";
+      case "ㄤ": 
+        return "ang";
+      dafault: 
+        return undefined;
+    }
   }
 }
 
@@ -1296,49 +1489,50 @@ class MenuScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('a', 'img/a.png');
-    this.load.image('ai', 'img/ai.png'); 
-    this.load.image('an', 'img/an.png');
-    this.load.image('ang', 'img/ang.png');
-    this.load.image('ao', 'img/ao.png');
-    this.load.image('b', 'img/b.png');
-    this.load.image('c', 'img/c.png');
-    this.load.image('ch', 'img/ch.png');
-    this.load.image('d', 'img/d.png');
-    this.load.image('e', 'img/e.png');
-    this.load.image('e2', 'img/e2.png');
-    this.load.image('ei', 'img/ei.png');
-    this.load.image('en', 'img/en.png');
-    this.load.image('eng', 'img/eng.png');
-    this.load.image('er', 'img/er.png');
-    this.load.image('f', 'img/f.png');
-    this.load.image('g', 'img/g.png');
-    this.load.image('h', 'img/h.png');
-    this.load.image('i', 'img/i.png');
-    this.load.image('j', 'img/j.png');
-    this.load.image('k', 'img/k.png');
-    this.load.image('l', 'img/l.png');
-    this.load.image('m', 'img/m.png');
-    this.load.image('n', 'img/n.png');
-    this.load.image('o', 'img/o.png');
-    this.load.image('ou', 'img/ou.png');
-    this.load.image('p', 'img/p.png');
-    this.load.image('q', 'img/q.png');
-    this.load.image('r', 'img/r.png');
-    this.load.image('s', 'img/s.png');
-    this.load.image('sh', 'img/sh.png');
-    this.load.image('t', 'img/t.png');
-    this.load.image('u', 'img/u.png');
-    this.load.image('u2', 'img/u2.png');
-    this.load.image('x', 'img/x.png');
-    this.load.image('z', 'img/z.png');
-    this.load.image('zh', 'img/zh.png');
-    this.load.image('2', 'img/2.png');
-    this.load.image('3', 'img/3.png');
-    this.load.image('4', 'img/4.png');
-    this.load.image('light', 'img/light.png');
-    this.load.image('keyboard', 'img/keyboard.png');
+    this.load.image('a', A);
+    this.load.image('ai', Ai); 
+    this.load.image('an', An);
+    this.load.image('ang', Ang);
+    this.load.image('ao', Ao);
+    this.load.image('b', B);
+    this.load.image('c', C);
+    this.load.image('ch', Ch);
+    this.load.image('d', D);
+    this.load.image('e', E);
+    this.load.image('e2', E2);
+    this.load.image('ei', Ei);
+    this.load.image('en', En);
+    this.load.image('eng', Eng);
+    this.load.image('er', Er);
+    this.load.image('f', F);
+    this.load.image('g', G);
+    this.load.image('h', H);
+    this.load.image('i', I);
+    this.load.image('j', J);
+    this.load.image('k', K);
+    this.load.image('l', L);
+    this.load.image('m', M);
+    this.load.image('n', N);
+    this.load.image('o', O);
+    this.load.image('ou', Ou);
+    this.load.image('p', P);
+    this.load.image('q', Q);
+    this.load.image('r', R);
+    this.load.image('s', S);
+    this.load.image('sh', Sh);
+    this.load.image('t', T);
+    this.load.image('u', U);
+    this.load.image('u2', U2);
+    this.load.image('x', X);
+    this.load.image('z', Z);
+    this.load.image('zh', Zh);
+    this.load.image('2', Two);
+    this.load.image('3', Three);
+    this.load.image('4', Four);
+    this.load.image('light', Light);
+    this.load.image('keyboard', Keyboard);
   }
+
   create() {
     this.modes = ["normal", "debug"];
     this.index = 0;
@@ -1375,7 +1569,40 @@ class ScoreScene extends Phaser.Scene {
 
   create() {
     gameState.onTyping = false;
+    gameState.timeReady = 60 * 3;
     gameState.scoreText = this.add.text(this.game.config.width/2, this.game.config.height/2, gameState.score, {fontSize: 30}).setOrigin(0.5, 0.5);
+    this.set = false;
+
+
+    // statsOfKeys.forEach(key => {
+
+    //   if(key.numOfMisstypes >= worstThree[2].numOfMisstypes) {
+    //     if(key.numOfMisstypes >= worstThree[1].numOfMisstypes) {
+    //       if(key.numOfMisstypes >= worstThree[0].numOfMisstypes) {
+    //         worstThree[2] = worstThree[1];
+    //         worstThree[1] = worstThree[0];
+    //         worstThree[0] = key;
+    //       } else {
+    //         worstThree[2] = worstThree[1];
+    //         worstThree[1] = key;
+    //       }
+    //     } else {
+    //       worstThree[2] = key;
+    //     }
+    //   }
+
+    // });
+
+    // if(gameState.worstThreeContainer === null) {
+    //   gameState.worstThreeContainer = this.add.container(100, 100);
+    // } else {
+    //   gameState.worstThreeContainer.destroy();
+    //   gameState.worstThreeContainer = this.add.container(100, 100);
+    // }
+
+    // for(let i = 0; i < 3; i++) {
+    //   gameState.worstThreeContainer.add(this.add.text(0 + 100 * i, 0, `${worstThree[i].key}: ${worstThree[i].accuracy}`));
+    // }
 
     this.options = ["replay", "title"];
     this.index = 0;
@@ -1413,6 +1640,105 @@ class ScoreScene extends Phaser.Scene {
       this.option = this.options[this.index];
       cursorRect.setY(this.index * 40);
     });
+
+    this.events.on('addedtoscene', () => {
+      console.log("addedtoscene");
+    });
+
+    this.events.on('boot', () => {
+      console.log("boot");
+    });
+
+    this.events.on('create', () => {
+      console.log("create");
+    });
+
+    this.events.on('destroy', () => {
+      console.log("destroy");
+    });   
+    
+    this.events.on('pause', () => {
+      console.log("pause");
+    });
+
+    this.events.on('postupdate', () => {
+      console.log("postupdate");
+    });   
+    
+    this.events.on('prerender', () => {
+      console.log("prerender");
+    });
+
+    this.events.on('preupdate', () => {
+      console.log("preupdate");
+    });   
+    
+    this.events.on('ready', () => {
+      console.log("ready");
+    });
+
+    this.events.on('removedfromscene', () => {
+      console.log("removedfromscene");
+    });   
+    
+    this.events.on('render', () => {
+      console.log("render");
+    });
+
+    this.events.on('resume', () => {
+      console.log("resume");
+    });
+
+    this.events.on('shutdown', () => {
+      console.log("shutdown");
+    });
+
+    this.events.on('resume', () => {
+      console.log("resumed");
+    });
+
+    this.events.on('sleep', () => {
+      console.log("sleep");
+    });
+
+    this.events.on('start', () => {
+      console.log("start");
+    });
+
+    this.events.on('transitioncomplete', () => {
+      console.log("transitioncomplete");
+    });
+
+    this.events.on('transitioninit', () => {
+      console.log("transitioninit");
+    });
+
+    this.events.on('transitionout', () => {
+      console.log("transitionout");
+    });
+
+    this.events.on('transitionstart', () => {
+      console.log("transitionstart");
+    });
+
+    this.events.on('transitionout', () => {
+      console.log("transitionout");
+    });
+
+    this.events.on('transitionwake', () => {
+      console.log("transitionwake");
+    });
+
+    this.events.on('update', () => {
+      console.log("update");
+    });
+
+    this.events.on('wake', () => {
+      console.log("wake");
+    });
+
+    console.log(this.events.on);
+
   }
 }
 
