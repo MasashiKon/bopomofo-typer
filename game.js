@@ -1849,9 +1849,9 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: 800,
     height: 600,
-    parent: "game"
+    // parent: "game"
   },
   scene: [MenuScene, GameScene, ScoreScene]
 }
 
-const game = new Phaser.Game(config);
+export const typingGame = () => {new Phaser.Game(config)};
